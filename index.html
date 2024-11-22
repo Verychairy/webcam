@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cross-Browser Webcam Viewer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+        video {
+            border: 5px solid #333;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <video id="webcam" autoplay playsinline></video>
+    <script>
+        async function startWebcam() {
+            const constraints = { video: true };
+            const videoElement = document.getElementById('webcam');
+
+            try {
+                // Check for navigator.mediaDevices and getUserMedia support
+                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                    videoElement.srcObject = stream;
+                } else if (navigator.getUserMedia) { // Older API fallback
+                    navigator.getUserMedia(constraints,
+                        function (stream) {
+                            videoElement.srcObject = stream;
+                        },
+                        function (error) {
+                            console.error("Error with getUserMedia:", error);
+                        });
+                } else if (window.webkitGetUserMedia) { // WebKit browsers
+                    window.webkitGetUserMedia(constraints,
+                        function (stream) {
+                            videoElement.srcObject = stream;
+                        },
+                        function (error) {
+                            console.error("Error with webkitGetUserMedia:", error);
+                        });
+                } else if (window.mozGetUserMedia) { // Older Firefox
+                    window.mozGetUserMedia(constraints,
+                        function (stream) {
+                            videoElement.srcObject = stream;
+                        },
+                        function (error) {
+                            console.error("Error with mozGetUserMedia:", error);
+                        });
+                } else {
+                    alert('Your browser does not support webcam access.');
+                }
+            } catch (error) {
+                console.error("Error accessing webcam:", error);
+                alert('Unable to access the webcam. Check your browser permissions.');
+            }
+        }
+
+        // Start webcam on page load
+        window.onload = startWebcam;
+    </script>
+</body>
+</html>
